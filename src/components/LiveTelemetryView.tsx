@@ -9,7 +9,7 @@ interface LiveTelemetryViewProps {
 
 export const LiveTelemetryView: React.FC<LiveTelemetryViewProps> = ({ packet, evaluation }) => {
   const angle = packet ? packet.flexionAngle : 0;
-  const isSimulated = packet?.isSimulated ?? true;
+  const isSimulated = packet?.isSimulated ?? false;
 
   const minRom = evaluation?.targetRom.min ?? 90;
   const maxRom = evaluation?.targetRom.max ?? 120;
@@ -30,9 +30,13 @@ export const LiveTelemetryView: React.FC<LiveTelemetryViewProps> = ({ packet, ev
           <span>[ REAL-TIME DUAL MPU6050 TELEMETRY ]</span>
         </h2>
         <span className={`text-xs px-2.5 py-0.5 border font-bold uppercase tracking-wider ${
-          isSimulated ? 'bg-[#1b1b1b] border-[#444933] text-[#8e9379]' : 'bg-[#c3f400] text-[#131313] border-[#c3f400]'
+          !packet
+            ? 'bg-[#1b1b1b] border-[#444933] text-[#8e9379]'
+            : isSimulated
+              ? 'bg-[#1b1b1b] border-[#444933] text-[#8e9379]'
+              : 'bg-[#c3f400] text-[#131313] border-[#c3f400]'
         }`}>
-          {isSimulated ? '[ HARDWARE: SIMULATOR ]' : '[ HARDWARE: PHYSICAL ESP32 COM ]'}
+          {!packet ? '[ HARDWARE: STANDBY ]' : isSimulated ? '[ HARDWARE: SIMULATOR ]' : '[ HARDWARE: PHYSICAL ESP32 COM ]'}
         </span>
       </div>
 

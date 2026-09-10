@@ -9,7 +9,7 @@ import { RecoveryScoreCard } from './components/RecoveryScoreCard';
 
 import { AuthModal, UserProfile } from './components/AuthModal';
 import { EvaluationResult, Patient, SerialBridgeStatus, TelemetryPacket } from './types';
-import { fetchBridgeStatus, fetchLatestTelemetry, fetchPatients, toggleSimulationMode } from './services/api';
+import { fetchBridgeStatus, fetchLatestTelemetry, fetchPatients, resetSessionCounters, toggleSimulationMode } from './services/api';
 import { wsClient } from './services/websocket';
 import { Gauge, Users, Zap, Cpu } from 'lucide-react';
 
@@ -113,6 +113,20 @@ export function App() {
     }
   };
 
+  const handleResetSession = async () => {
+    try {
+      const res = await resetSessionCounters();
+      if (res.success) {
+        setEvaluation(res.evaluation);
+        if (res.latestPacket) {
+          setTelemetryPacket(res.latestPacket);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to reset session counters:', err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#131313] text-[#e2e2e2] flex flex-col font-sans bg-grid-pattern">
       
@@ -195,12 +209,13 @@ export function App() {
                 repCount={evaluation?.repCount || 0}
                 validReps={evaluation?.validReps || 0}
                 consecutiveErrors={evaluation?.consecutiveErrors || 0}
+                onReset={handleResetSession}
               />
 
               <RecoveryScoreCard
-                score={selectedPatient?.recoveryScore || 84}
-                accuracyScore={evaluation ? (evaluation.repCount > 0 ? Math.round((evaluation.validReps / evaluation.repCount) * 100) : 100) : 90}
-                romScore={evaluation?.romAchieved ? 100 : 85}
+                score={evaluation && evaluation.repCount > 0 ? Math.round((evaluation.validReps / evaluation.repCount) * 40 + (evaluation.romAchieved ? 40 : 25) + (selectedPatient?.complianceRate || 92) * 0.2) : 0}
+                accuracyScore={evaluation && evaluation.repCount > 0 ? Math.round((evaluation.validReps / evaluation.repCount) * 100) : 0}
+                romScore={evaluation?.romAchieved ? 100 : 0}
                 complianceScore={selectedPatient?.complianceRate || 92}
               />
 

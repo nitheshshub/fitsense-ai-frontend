@@ -7,13 +7,15 @@ interface RepStateMachineCardProps {
   repCount: number;
   validReps: number;
   consecutiveErrors: number;
+  onReset?: () => void;
 }
 
 export const RepStateMachineCard: React.FC<RepStateMachineCardProps> = ({
   currentPhase = 'REST',
   repCount = 0,
   validReps = 0,
-  consecutiveErrors = 0
+  consecutiveErrors = 0,
+  onReset
 }) => {
   const phases: { id: ExercisePhase; label: string; desc: string }[] = [
     { id: 'REST', label: '01 // REST', desc: 'At rest (≤15° flexion)' },
@@ -31,9 +33,21 @@ export const RepStateMachineCard: React.FC<RepStateMachineCardProps> = ({
           <RotateCcw className="w-4 h-4" />
           <span>[ REPETITION STATE MACHINE ]</span>
         </h3>
-        <span className="text-xs bg-[#2a2a2a] text-[#8e9379] px-2 py-0.5 border border-[#444933] uppercase">
-          AUTOMATED RECONSTRUCTION
-        </span>
+        <div className="flex items-center space-x-2">
+          {onReset && (
+            <button
+              onClick={onReset}
+              className="text-[10px] bg-[#131313] hover:bg-[#c3f400] text-[#c3f400] hover:text-[#131313] px-2 py-0.5 border border-[#c3f400] font-mono font-bold uppercase transition-all flex items-center space-x-1"
+              title="Reset all rep counters to ZERO"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>[ 🔄 RESET TO ZERO ]</span>
+            </button>
+          )}
+          <span className="text-xs bg-[#2a2a2a] text-[#8e9379] px-2 py-0.5 border border-[#444933] uppercase">
+            AUTOMATED RECONSTRUCTION
+          </span>
+        </div>
       </div>
 
       {/* Phase Steps Grid */}
@@ -73,7 +87,7 @@ export const RepStateMachineCard: React.FC<RepStateMachineCardProps> = ({
         <div className="px-2">
           <div className="text-[10px] text-[#8e9379] uppercase font-bold tracking-widest">[ FORM ACCURACY ]</div>
           <div className="text-3xl font-black text-[#ffffff] font-mono">
-            {repCount > 0 ? `${Math.round((validReps / repCount) * 100)}%` : '100%'}
+            {repCount > 0 ? `${Math.round((validReps / repCount) * 100)}%` : '0%'}
           </div>
         </div>
       </div>

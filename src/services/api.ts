@@ -64,3 +64,11 @@ export async function endExerciseSession() {
   });
   return res.json();
 }
+
+export async function resetSessionCounters() {
+  const res = await fetch(`${currentApiBaseUrl}/api/sessions/reset`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return res.json();
+}

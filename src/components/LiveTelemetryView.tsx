@@ -5,9 +5,10 @@ import { Gauge, Cpu, AlertTriangle, CheckCircle } from 'lucide-react';
 interface LiveTelemetryViewProps {
   packet: TelemetryPacket | null;
   evaluation: EvaluationResult | null;
+  onResetAngle?: () => void;
 }
 
-export const LiveTelemetryView: React.FC<LiveTelemetryViewProps> = ({ packet, evaluation }) => {
+export const LiveTelemetryView: React.FC<LiveTelemetryViewProps> = ({ packet, evaluation, onResetAngle }) => {
   const isStandby = !packet || packet.deviceId === 'STANDBY';
   const angle = isStandby ? 0 : packet.flexionAngle;
   const isSimulated = packet?.isSimulated ?? false;
@@ -30,15 +31,26 @@ export const LiveTelemetryView: React.FC<LiveTelemetryViewProps> = ({ packet, ev
           <Gauge className="w-4 h-4" />
           <span>[ REAL-TIME DUAL MPU6050 TELEMETRY ]</span>
         </h2>
-        <span className={`text-xs px-2.5 py-0.5 border font-bold uppercase tracking-wider ${
-          isStandby
-            ? 'bg-[#1b1b1b] border-[#444933] text-[#8e9379]'
-            : isSimulated
+        <div className="flex items-center space-x-2">
+          {onResetAngle && (
+            <button
+              onClick={onResetAngle}
+              className="text-[10px] bg-[#131313] hover:bg-[#c3f400] text-[#c3f400] hover:text-[#131313] px-2 py-0.5 border border-[#c3f400] font-mono font-bold uppercase transition-all flex items-center space-x-1"
+              title="Force angle readout to 0.0 DEG baseline"
+            >
+              <span>🎯 ZERO BASELINE (0.0°)</span>
+            </button>
+          )}
+          <span className={`text-xs px-2.5 py-0.5 border font-bold uppercase tracking-wider ${
+            isStandby
               ? 'bg-[#1b1b1b] border-[#444933] text-[#8e9379]'
-              : 'bg-[#c3f400] text-[#131313] border-[#c3f400]'
-        }`}>
-          {isStandby ? '[ HARDWARE: STANDBY ]' : isSimulated ? '[ HARDWARE: SIMULATOR ]' : '[ HARDWARE: PHYSICAL ESP32 COM ]'}
-        </span>
+              : isSimulated
+                ? 'bg-[#1b1b1b] border-[#444933] text-[#8e9379]'
+                : 'bg-[#c3f400] text-[#131313] border-[#c3f400]'
+          }`}>
+            {isStandby ? '[ HARDWARE: STANDBY ]' : isSimulated ? '[ HARDWARE: SIMULATOR ]' : '[ HARDWARE: PHYSICAL ESP32 COM ]'}
+          </span>
+        </div>
       </div>
 
       {/* Main Flexion Angle Digital Meter & Gauge */}

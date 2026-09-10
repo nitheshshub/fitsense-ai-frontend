@@ -199,7 +199,7 @@ export function App() {
           <div className="space-y-6">
             
             {/* Live Angle Gauge & MPU Breakdown */}
-            <LiveTelemetryView packet={telemetryPacket} evaluation={evaluation} />
+            <LiveTelemetryView packet={telemetryPacket} evaluation={evaluation} onResetAngle={handleResetSession} />
 
             {/* Grid 2 Column: State Machine & Recovery Score */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

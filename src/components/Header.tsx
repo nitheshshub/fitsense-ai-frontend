@@ -1,15 +1,26 @@
 import React, { useState } from 'react';
-import { Activity, Radio, AlertTriangle, ShieldCheck, Server, RefreshCw } from 'lucide-react';
+import { Activity, Radio, AlertTriangle, ShieldCheck, Server, User, Key, LogOut } from 'lucide-react';
 import { getApiBaseUrl, setApiBaseUrl } from '../services/api';
 import { wsClient } from '../services/websocket';
+import { UserProfile } from './AuthModal';
 
 interface HeaderProps {
   wsConnected: boolean;
   activePhase?: string;
   consecutiveErrors?: number;
+  currentUser: UserProfile | null;
+  onOpenAuth: () => void;
+  onLogout: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ wsConnected, activePhase, consecutiveErrors = 0 }) => {
+export const Header: React.FC<HeaderProps> = ({
+  wsConnected,
+  activePhase,
+  consecutiveErrors = 0,
+  currentUser,
+  onOpenAuth,
+  onLogout
+}) => {
   const [currentUrl, setCurrentUrl] = useState(getApiBaseUrl());
   const [showUrlModal, setShowUrlModal] = useState(false);
 
@@ -44,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({ wsConnected, activePhase, consec
           </div>
         </div>
 
-        {/* Live Status Indicators */}
+        {/* Live Status Indicators & Authentication Badge */}
         <div className="flex flex-wrap items-center gap-3">
           
           {/* WebSocket Live Stream Indicator */}
@@ -85,13 +96,45 @@ export const Header: React.FC<HeaderProps> = ({ wsConnected, activePhase, consec
             <Server className="w-4 h-4 text-[#c3f400]" />
             <span className="hidden sm:inline">RENDER BACKEND</span>
           </button>
+
+          {/* Authentication & User Profile Controls */}
+          {currentUser ? (
+            <div className="flex items-center space-x-2 bg-[#1b1b1b] border border-[#c3f400] p-1 pr-2">
+              <button 
+                onClick={onOpenAuth}
+                className="flex items-center space-x-2 text-xs font-mono text-[#c3f400] font-bold px-2 py-0.5 hover:bg-[#2a2a2a] transition-colors"
+                title="View / Switch Account"
+              >
+                <div className="bg-[#c3f400] text-[#131313] w-5 h-5 font-black text-[10px] flex items-center justify-center">
+                  {currentUser.name.charAt(0).toUpperCase()}
+                </div>
+                <span>[ {currentUser.role}: {currentUser.name.toUpperCase()} ]</span>
+              </button>
+              <button
+                onClick={onLogout}
+                className="text-[#8e9379] hover:text-[#ff5500] p-1 transition-colors"
+                title="Sign Out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenAuth}
+              className="bg-[#c3f400] hover:bg-[#d5ff24] text-[#131313] px-3.5 py-1.5 border border-[#c3f400] text-xs font-black tracking-wider uppercase transition-all flex items-center space-x-1.5 glow-yellow"
+            >
+              <Key className="w-4 h-4 stroke-[2.5]" />
+              <span>[ SIGN IN / LOGIN ]</span>
+            </button>
+          )}
+
         </div>
 
       </div>
 
       {/* Target URL Modal */}
       {showUrlModal && (
-        <div className="mt-3 max-w-[1440px] mx-auto p-4 bg-[#1b1b1b] border-2 border-[#c3f400] text-xs space-y-2">
+        <div className="mt-3 max-w-[1440px] mx-auto p-4 bg-[#1b1b1b] border-2 border-[#c3f400] text-xs space-y-2 font-mono">
           <div className="flex items-center justify-between font-bold text-[#c3f400] tracking-wider uppercase">
             <span>[ CONFIGURE BACKEND API TARGET ]</span>
             <button onClick={() => setShowUrlModal(false)} className="text-[#e2e2e2] hover:text-[#ff5500]">✕</button>
@@ -100,13 +143,13 @@ export const Header: React.FC<HeaderProps> = ({ wsConnected, activePhase, consec
           <div className="flex flex-col sm:flex-row gap-2">
             <button 
               onClick={() => handleUrlChange('https://fitsense-ai-backend-vpak.onrender.com')}
-              className={`px-3 py-2 border text-left font-mono text-xs ${currentUrl.includes('onrender') ? 'bg-[#c3f400] text-[#131313] font-bold border-[#c3f400]' : 'bg-[#2a2a2a] border-[#444933] text-[#e2e2e2]'}`}
+              className={`px-3 py-2 border text-left text-xs ${currentUrl.includes('onrender') ? 'bg-[#c3f400] text-[#131313] font-bold border-[#c3f400]' : 'bg-[#2a2a2a] border-[#444933] text-[#e2e2e2]'}`}
             >
               [ CLOUD RENDER ]: https://fitsense-ai-backend-vpak.onrender.com
             </button>
             <button 
               onClick={() => handleUrlChange('http://localhost:5000')}
-              className={`px-3 py-2 border text-left font-mono text-xs ${currentUrl.includes('localhost') ? 'bg-[#c3f400] text-[#131313] font-bold border-[#c3f400]' : 'bg-[#2a2a2a] border-[#444933] text-[#e2e2e2]'}`}
+              className={`px-3 py-2 border text-left text-xs ${currentUrl.includes('localhost') ? 'bg-[#c3f400] text-[#131313] font-bold border-[#c3f400]' : 'bg-[#2a2a2a] border-[#444933] text-[#e2e2e2]'}`}
             >
               [ LOCALHOST ]: http://localhost:5000
             </button>

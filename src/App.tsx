@@ -7,6 +7,7 @@ import { PatientDetailView } from './components/PatientDetailView';
 import { MultiModalFeedback } from './components/MultiModalFeedback';
 import { RecoveryScoreCard } from './components/RecoveryScoreCard';
 
+import { AuthModal, UserProfile } from './components/AuthModal';
 import { EvaluationResult, Patient, SerialBridgeStatus, TelemetryPacket } from './types';
 import { fetchBridgeStatus, fetchLatestTelemetry, fetchPatients, toggleSimulationMode } from './services/api';
 import { wsClient } from './services/websocket';
@@ -22,6 +23,31 @@ export function App() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   
   const [activeTab, setActiveTab] = useState<'LIVE' | 'PATIENTS' | 'HAPTICS' | 'HARDWARE'>('LIVE');
+
+  // Authentication State
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    try {
+      const saved = localStorage.getItem('fitsense_user_profile');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  const handleLoginSuccess = (profile: UserProfile) => {
+    setCurrentUser(profile);
+    try {
+      localStorage.setItem('fitsense_user_profile', JSON.stringify(profile));
+    } catch (e) {}
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem('fitsense_user_profile');
+    } catch (e) {}
+  };
 
   useEffect(() => {
     // 1. Fetch patients directory
@@ -95,6 +121,9 @@ export function App() {
         wsConnected={wsConnected || true}
         activePhase={evaluation?.currentPhase}
         consecutiveErrors={evaluation?.consecutiveErrors}
+        currentUser={currentUser}
+        onOpenAuth={() => setShowAuthModal(true)}
+        onLogout={handleLogout}
       />
 
       {/* Main Container */}
@@ -303,6 +332,14 @@ export function App() {
       <footer className="bg-[#0e0e0e] border-t-2 border-[#444933] py-4 text-center text-xs text-[#8e9379] uppercase font-mono tracking-wider">
         FITSENSE AI // FLEXSENSE • HACK SUMMIT 7.0 @ SRM IST • TEAM HACKELITE / RAZERS (NITHESH P, KOUSHIK G, SUJAY S)
       </footer>
+
+      {/* Clinical Auth Portal Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onLoginSuccess={handleLoginSuccess}
+        currentUser={currentUser}
+      />
 
     </div>
   );

@@ -114,13 +114,23 @@ export function App() {
   };
 
   const handleResetSession = async () => {
+    const standbyPacket: TelemetryPacket = {
+      timestamp: Date.now(),
+      deviceId: 'STANDBY',
+      sensor1: { roll: 0, pitch: 0, yaw: 0 },
+      sensor2: { roll: 0, pitch: 0, yaw: 0 },
+      flexionAngle: 0.0,
+      batteryLevel: 100,
+      isSimulated: false
+    };
+    setTelemetryPacket(standbyPacket);
+
     try {
+      await toggleSimulationMode(false);
       const res = await resetSessionCounters();
       if (res.success) {
         setEvaluation(res.evaluation);
-        if (res.latestPacket) {
-          setTelemetryPacket(res.latestPacket);
-        }
+        setTelemetryPacket(res.latestPacket || standbyPacket);
       }
     } catch (err) {
       console.error('Failed to reset session counters:', err);

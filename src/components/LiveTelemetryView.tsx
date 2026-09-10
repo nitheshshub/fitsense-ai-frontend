@@ -9,9 +9,9 @@ interface LiveTelemetryViewProps {
 }
 
 export const LiveTelemetryView: React.FC<LiveTelemetryViewProps> = ({ packet, evaluation, onResetAngle }) => {
-  const isStandby = !packet || packet.deviceId === 'STANDBY';
-  const angle = isStandby ? 0 : packet.flexionAngle;
   const isSimulated = packet?.isSimulated ?? false;
+  const isStandby = !packet || packet.deviceId === 'STANDBY' || (!isSimulated && (packet?.deviceId || '').includes('SIMULATOR'));
+  const angle = isStandby ? 0 : packet.flexionAngle;
 
   const minRom = evaluation?.targetRom.min ?? 90;
   const maxRom = evaluation?.targetRom.max ?? 120;
